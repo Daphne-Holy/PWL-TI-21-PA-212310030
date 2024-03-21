@@ -84,9 +84,7 @@ export default function MessagersUI() {
             items={{
               title: "Create new chat",
               btn_class: "btn-icon btn-clear",
-            }}
-          >
-            <i className="bi bi-pencil-square"></i>
+            }}><i className="bi bi-pencil-square"></i>
           </ButtonSecondary>
         </div>
       </div>

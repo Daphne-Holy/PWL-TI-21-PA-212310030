@@ -7,9 +7,7 @@ const ButtonPrimary = ({ children, items, actions }) => {
       type="submit"
       title={items.title}
       onClick={actions}
-    >
-      {children}
-    </button>
+    >{children}</button>
   );
 };
 
@@ -20,9 +18,7 @@ const ButtonSecondary = ({ children, items, actions }) => {
       type="button"
       title={items.title}
       onClick={actions}
-    >
-      {children}
-    </button>
+    >{children}</button>
   );
 };
 
