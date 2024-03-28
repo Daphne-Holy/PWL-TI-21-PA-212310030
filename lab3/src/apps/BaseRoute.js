@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import ChapterOne from "../Widget/components/ChapterOne";
+import ChapterOne from "../modules/Chapter-1/ChapterOne";
+// import { ChapterTwo } from "../modules/Chapter-2/widgets";
 
 export default function BaseRoute() {
   return (
