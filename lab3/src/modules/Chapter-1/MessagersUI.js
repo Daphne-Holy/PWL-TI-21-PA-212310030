@@ -22,10 +22,21 @@ export default function MessagersUI() {
   const [myChat, setMyChat] = useState([
     { id: 1, message: "Hi", from: "Febry", date: "2024-02-22 10:30:00" },
     { id: 2, message: "Iya", from: "Isnan", date: "2024-02-22 10:35:00" },
-    { id: 3, message: "Apakah itu Micro-Frontend ?", from: "Febry", date: "2024-02-22 10:50:00" },
+    {
+      id: 3,
+      message: "Apakah itu Micro-Frontend ?",
+      from: "Febry",
+      date: "2024-02-22 10:50:00",
+    },
     { id: 4, message: "Kaga tau", from: "Isnan", date: "2024-02-22 10:52:00" },
     { id: 5, message: "Apaan dah", from: "Isnan", date: "2024-02-22 10:52:00" },
-    { id: 6, message: "Arsitektur pada bagian FrontEnd aplikasi yang berpusat pada independensi suatu fitur dengan fitur lainnya.", from: "Febry", date: "2024-02-22 11:00:00" },
+    {
+      id: 6,
+      message:
+        "Arsitektur pada bagian FrontEnd aplikasi yang berpusat pada independensi suatu fitur dengan fitur lainnya.",
+      from: "Febry",
+      date: "2024-02-22 11:00:00",
+    },
     { id: 7, message: "Bijiiii", from: "Isnan", date: "2024-02-22 12:12:00" },
   ]);
 
@@ -47,7 +58,7 @@ export default function MessagersUI() {
       id: myChat.length + 1,
       message: writeChat,
       from: "Febry",
-      date: moment().format('YYYY-MM-DD HH:mm:ss')
+      date: moment().format("YYYY-MM-DD HH:mm:ss"),
     };
 
     setMyChat([...myChat, newMessage]);
@@ -65,7 +76,9 @@ export default function MessagersUI() {
             items={{
               title: "Create new chat",
               btn_class: "btn-icon btn-clear",
-            }}><i className="bi bi-pencil-square"></i>
+            }}
+          >
+            <i className="bi bi-pencil-square"></i>
           </ButtonSecondary>
         </div>
       </div>
@@ -75,18 +88,22 @@ export default function MessagersUI() {
           style={StylesMessager.chatBox}
         >
           {myChat.map((message, index) => {
-            const currentDate = moment(message.date).format('YYYY-MM-DD');
-            const previousDate = index > 0 ? moment(myChat[index - 1].date).format('YYYY-MM-DD') : null;
+            const currentDate = moment(message.date).format("YYYY-MM-DD");
+            const previousDate =
+              index > 0
+                ? moment(myChat[index - 1].date).format("YYYY-MM-DD")
+                : null;
 
             if (previousDate !== currentDate) {
-              const todayDate = moment().format('YYYY-MM-DD');
-              const displayDate = currentDate === todayDate ? "Today" : moment(message.date).format('MMMM DD, YYYY'); //Buat date, menunjukkan Today
+              const todayDate = moment().format("YYYY-MM-DD");
+              const displayDate =
+                currentDate === todayDate
+                  ? "Today"
+                  : moment(message.date).format("MMMM DD, YYYY"); //Buat date, menunjukkan Today
 
               return (
                 <div key={index}>
-                  <div style={StylesMessager.dateStyle}>
-                    {displayDate}
-                  </div>
+                  <div style={StylesMessager.dateStyle}>{displayDate}</div>
                   <ChatBody data={[message]} />
                 </div>
               );
@@ -97,10 +114,12 @@ export default function MessagersUI() {
           <div ref={endOfMessagesRef} />
         </div>
         <div className="chat-send bg-light p-3">
-          <form method="post" autoComplete="off" onSubmit={(e) => HandlerSendChat(e)}>
-            <div
-              className="d-flex justify-content-between align-items-center"
-            >
+          <form
+            method="post"
+            autoComplete="off"
+            onSubmit={(e) => HandlerSendChat(e)}
+          >
+            <div className="d-flex justify-content-between align-items-center">
               <input
                 type="text"
                 className="form-control me-2"

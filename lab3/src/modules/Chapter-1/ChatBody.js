@@ -19,13 +19,15 @@ const ChatBubbleItem = ({ data, isSender }) => {
     textAlign: isSender ? "right" : "left", // Align container to the right for sender bubbles, left for receiver bubbles
     marginBottom: "10px", // Added to create spacing between chat bubbles
   };
-  
 
   return (
     <div style={containerStyle}>
       <div style={bubbleStyle}>
         <span>{data.message}</span>
-        <span className="chat-date" style={{ fontSize: "11px", marginLeft: "5px" }}>
+        <span
+          className="chat-date"
+          style={{ fontSize: "11px", marginLeft: "5px" }}
+        >
           {moment(data.date).format("HH:mm")}
         </span>
       </div>
@@ -39,7 +41,11 @@ const ChatBody = ({ data }) => {
   return (
     <div className="chat-body">
       {data.map((message, index) => (
-        <ChatBubbleItem key={index} data={message} isSender={message.from === itsme} />
+        <ChatBubbleItem
+          key={index}
+          data={message}
+          isSender={message.from === itsme}
+        />
       ))}
     </div>
   );

@@ -6,9 +6,9 @@ import BaseRoute from './apps/BaseRoute';
 function App() {
   return (
     <BrowserRouter>
-      <LayoutInit>
+      {/* <LayoutInit> */}
         <BaseRoute/>
-      </LayoutInit>
+      {/* </LayoutInit> */}
     </BrowserRouter>
   );
 }
