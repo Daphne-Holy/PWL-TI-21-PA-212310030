@@ -1,63 +1,54 @@
 import React from "react";
 import moment from "moment";
 
-export default function ChatBody({ data }) {
-  const me = "0419029203";
+const ChatBubbleItem = ({ data, isSender }) => {
+  const bubbleStyle = {
+    backgroundColor: isSender ? "#a198a7" : "#a83aef",
+    alignSelf: isSender ? "flex-end" : "flex-start",
+    color: "#fff",
+    padding: "8px",
+    borderRadius: "10px",
+    maxWidth: "70%",
+    textAlign: isSender ? "right" : "left",
+    display: "inline-block",
+    wordWrap: "break-word",
+    marginBottom: "10px", // Added to create spacing between chat bubbles
+  };
+
+  const containerStyle = {
+    textAlign: isSender ? "right" : "left", // Align container to the right for sender bubbles, left for receiver bubbles
+    marginBottom: "10px", // Added to create spacing between chat bubbles
+  };
 
   return (
-    <div className="chat-items">
-      {data.map((value, index) => (
-        <div
-          className="chat-item"
-          style={styleChatItems.chatBubbleItems}
-          key={index}
+    <div style={containerStyle}>
+      <div style={bubbleStyle}>
+        <span>{data.messages}</span>
+        <span
+          className="chat-date"
+          style={{ fontSize: "11px", marginLeft: "5px" }}
         >
-          <div
-            className="chat text-white rounded my-2 p-2"
-            style={{
-              ...styleChatItems.chatBubble,
-              ...(value.from_id === me
-                ? styleChatItems.chatBubbleSender
-                : styleChatItems.chatBubbleReceiver),
-              backgroundColor: getBubbleColor(value.sentiment),
-            }}
-          >
-            <span className="me-3 text-warning">{value.sentiment}</span>
-            <br />
-            <span className="me-3">{value.messages}</span>
-            <span className="chat-date" style={{ fontSize: "11px" }}>
-              {moment(value.date).format("HH:mm")}
-            </span>
-          </div>
-        </div>
+          {moment(data.date).format("HH:mm")}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const ChatBody = ({ data }) => {
+  const itsme = "Febry";
+
+  return (
+    <div className="chat-body">
+      {data.map((message, index) => (
+        <ChatBubbleItem
+          key={index}
+          data={message}
+          isSender={message.from === itsme}
+        />
       ))}
     </div>
   );
-}
-
-const styleChatItems = {
-  chatBubbleItems: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  chatBubbleSender: {
-    textAlign: "right",
-    backgroundColor: "#a198a7",
-    alignSelf: "flex-end",
-  },
-  chatBubbleReceiver: {
-    backgroundColor: "#a83aef",
-    alignSelf: "flex-start",
-  },
 };
 
-const getBubbleColor = (sentiment) => {
-  switch (sentiment) {
-    case "Positif":
-      return "#007bff"; // biru untuk sentimen positif
-    case "Negatif":
-      return "#dc3545"; // merah untuk sentimen negatif
-    default:
-      return "#ccc"; // abu-abu untuk sentimen netral
-  }
-};
+export default ChatBody;
