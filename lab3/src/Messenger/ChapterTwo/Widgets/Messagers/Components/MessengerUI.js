@@ -1,53 +1,46 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { ButtonPrimary, ButtonSecondary } from "./ButtonUI";
-import ChatBody from "./ChatBody";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import moment from "moment";
-import EmptyChat from "./EmptyChat";
-import { ButtonSearch } from "../../Components/ButtonUI";
-// import { Messegers } from "../../Constantas/DataChat";
+import { ButtonPrimary } from "../Components/ButtonUI";
+import ChatBody from "../Components/ChatBody";
+import Sentiment from "sentiment";
 
-export default function MessengerUI({ selectedChat, profile, selectedUser }) {
-  const StylesMessager = {
-    chatBox: {
-      minHeight: "200px",
-      maxHeight: "45vh",
-      overflowY: "auto",
-    },
-    dateStyle: {
-      textAlign: "center",
-      margin: "10px 0",
-      color: "#999",
-      fontWeight: "bold",
-    },
-  };
-
+const MessengersUI = ({ profile, selectedChat }) => {
+  const [myChat, setMyChat] = useState(selectedChat);
   const [writeChat, setWriteChat] = useState("");
-  const [myChat, setMyChat] = useState([]);
-
-  const [search, setSearch] = useState("");
-
-  const ResultMessageData = useMemo(() => {
-    let computedData = myChat.map((msg) => ({
-      ...msg,
-      date_fmt: moment(msg.date).format("YYYY-MM-DD"),
-      isOutgoing: msg.from_id === profile.id,
-    }));
-    if (search) {
-      computedData = computedData.filter((listData) => {
-        return Object.keys(listData).some((key) =>
-          listData[key].toString().toLowerCase().includes(search)
-        );
-      });
-    }
-    return computedData;
-  }, [myChat, profile.id, search]);
-
-  const endOfMessagesRef = useRef(null);
+  const endOfMessageRef = useRef(null);
 
   const scrollToBottom = () => {
-    endOfMessagesRef.current?.scrollIntoView({
+    endOfMessageRef.current?.scrollIntoView({
       behavior: "smooth",
     });
+  };
+
+  const filterBadWords = (message) => {
+    const badWords = ["fuck"];
+    let filteredMessage = message;
+
+    badWords.forEach((word) => {
+      const regex = new RegExp(word, "gi");
+      filteredMessage = filteredMessage.replace(regex, "****");
+    });
+
+    return filteredMessage;
+  };
+
+  const handleSendChat = (e) => {
+    e.preventDefault();
+
+    const filteredChat = filterBadWords(writeChat);
+
+    const objChat = {
+      id: 100,
+      messages: filteredChat,
+      from_id: profile.id,
+      createdAt: new Date(),
+    };
+
+    setMyChat([...myChat, objChat]);
+    setWriteChat("");
   };
 
   useEffect(() => {
@@ -55,72 +48,100 @@ export default function MessengerUI({ selectedChat, profile, selectedUser }) {
     scrollToBottom();
   }, [selectedChat]);
 
-  const HandlerSendChat = (e) => {
-    e.preventDefault();
-    const newMessage = {
-      id: myChat.length + 1,
-      message: writeChat,
-      from: "Febry",
-      date: moment().format("YYYY-MM-DD HH:mm:ss"),
-    };
+  const sentiment = new Sentiment();
 
-    setMyChat([...myChat, newMessage]);
-    setWriteChat("");
+  const resultMessageData = useMemo(() => {
+    let computedData = [];
+    if (myChat.length > 0) {
+      computedData = myChat.map((msg) => {
+        const filteredMessage = filterBadWords(msg.messages);
+        const result = sentiment.analyze(filteredMessage);
+        let sentimentLabel = "Netral";
+        if (result.score > 0) sentimentLabel = "Positif";
+        else if (result.score < 0) sentimentLabel = "Negatif";
+
+        return {
+          ...msg,
+          messages: filteredMessage,
+          sentiment: sentimentLabel,
+          date: msg.createdAt,
+          date_fmt: moment(msg.createdAt).format("YYYY-MM-DD"),
+          isOutgoing: msg.from_id === profile.id,
+        };
+      });
+    }
+
+    return computedData;
+  }, [myChat, profile.id]);
+
+  const EmptyChat = () => (
+    <div className="info text-center">
+      <h1>No Conversations</h1>
+      <p>You haven't made any conversation yet, please select a user</p>
+      <span className="badge badge-primary">Start a chat</span>
+    </div>
+  );
+
+  const readChatToSpeech = () => {
+    let speechText = "";
+    let currentSender = "";
+    let paragraph = "";
+
+    if (resultMessageData.length > 0) {
+      resultMessageData.forEach((msg, index) => {
+        const sender = msg.isOutgoing ? "Saya" : `Pengirim ${msg.from_id}`;
+        if (sender !== currentSender) {
+          if (paragraph) {
+            speechText += `${paragraph}. `;
+          }
+          currentSender = sender;
+          paragraph = `${sender}: ${msg.messages}`;
+        } else {
+          paragraph += ` ${msg.messages}`;
+        }
+
+        if (index === resultMessageData.length - 1) {
+          speechText += `${paragraph}.`;
+        }
+      });
+
+      const speechSynthesis = window.speechSynthesis;
+      const utterance = new SpeechSynthesisUtterance(speechText);
+      speechSynthesis.speak(utterance);
+    }
   };
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <h3 className="card-title align-items-start flex-column">
-          <span className="fw-bold mb-2 text-gray-900">Chats with {selectedUser.name}</span>
-        </h3>
-        <div className="card-toolbar align-items-right d-flex">
-          <ButtonSearch setSearch={setSearch}>
-            <span className="svg-icon svg-icon-1 svg-icon-gray-400 me1">
-              <i class="bi bi-search"></i>
-            </span>
-          </ButtonSearch>
-        </div>
+    <div className="card my-3">
+      <div className="card-header d-flex justify-content-between flex-row">
+        <h5 className="card-title my-auto">
+          <span className="fw-bold mb-2" style={{ color: "gray" }}>
+            Chat
+          </span>
+        </h5>
       </div>
+
       <div className="card-body p-0">
-        {ResultMessageData.length > 0 ? (
+        {resultMessageData.length > 0 ? (
           <>
             <div
               className="chat-message px-2 bg-light-primary"
-              style={StylesMessager.chatBox}
+              style={styleMessage.chatBox}
             >
-              {myChat.map((message, index) => {
-                const currentDate = moment(message.date).format("YYYY-MM-DD");
-                const previousDate =
-                  index > 0
-                    ? moment(myChat[index - 1].date).format("YYYY-MM-DD")
-                    : null;
-
-                if (previousDate !== currentDate) {
-                  const todayDate = moment().format("YYYY-MM-DD");
-                  const displayDate =
-                    currentDate === todayDate
-                      ? "Today"
-                      : moment(message.date).format("MMMM DD, YYYY"); //Buat date, menunjukkan Today
-
-                  return (
-                    <div key={index}>
-                      <div style={StylesMessager.dateStyle}>{displayDate}</div>
-                      <ChatBody data={[message]} />
-                    </div>
-                  );
-                } else {
-                  return <ChatBody key={index} data={[message]} />;
-                }
-              })}
-              <div ref={endOfMessagesRef} />
+              <ChatBody data={resultMessageData} />
+              <div ref={endOfMessageRef}></div>
             </div>
+            <div className="card-footer text-muted text-center">
+              <p className="mb-0">
+                Status sentimental:
+                <span className="text-primary">Positif</span>,
+                <span className="text-danger">Negatif</span>,
+                <span className="text-muted">Netral</span>
+              </p>
+            </div>
+
             <div className="chat-send bg-light p-3">
-              <form
-                method="post"
-                autoComplete="off"
-                onSubmit={(e) => HandlerSendChat(e)}
-              >
+              <form onSubmit={handleSendChat} autoComplete="off">
                 <div className="d-flex justify-content-between align-items-center">
                   <input
                     type="text"
@@ -130,16 +151,21 @@ export default function MessengerUI({ selectedChat, profile, selectedUser }) {
                     onChange={(e) => setWriteChat(e.target.value)}
                   />
                   <ButtonPrimary
-                    items={{
-                      title: "Send",
-                      btn_class: "btn-icon btn-success",
-                      type: "submit",
-                    }}
+                    items={{ title: "Create new chat", btn_class: "btn-icon" }}
                   >
                     <i className="bi bi-send"></i>
                   </ButtonPrimary>
                 </div>
               </form>
+            </div>
+
+            <div className="card-footer text-end">
+              <button
+                className="btn btn-primary mt-3"
+                onClick={readChatToSpeech}
+              >
+                Text to Speech
+              </button>
             </div>
           </>
         ) : (
@@ -148,4 +174,14 @@ export default function MessengerUI({ selectedChat, profile, selectedUser }) {
       </div>
     </div>
   );
-}
+};
+
+const styleMessage = {
+  chatBox: {
+    minHeight: "200px",
+    maxHeight: "45vh",
+    overflowY: "auto",
+  },
+};
+
+export default MessengersUI;

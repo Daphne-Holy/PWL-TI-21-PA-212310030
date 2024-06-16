@@ -1,6 +1,8 @@
 import React from "react";
 import moment from "moment";
+import Sentiment from "sentiment";
 
+const sentiment = new Sentiment();
 const ChatBubbleItem = ({ data, isSender }) => {
   const bubbleStyle = {
     backgroundColor: isSender ? "#a198a7" : "#a83aef",
